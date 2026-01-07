@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Bouncer - Leaderboard 🏆</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes cyberpunkGlow {
+            0%, 100% { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff; }
+            50% { text-shadow: 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes neonBorder {
+            0%, 100% { box-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 15px #00ffff, 0 0 20px #00ffff; }
+            50% { box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff; }
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a0a1a 100%);
+            min-height: 100vh;
+            color: #00ffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 255, 0.03) 2px,
+                    rgba(0, 255, 255, 0.03) 4px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            font-weight: bold;
+            animation: cyberpunkGlow 3s infinite;
+            margin-bottom: 10px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #ff00ff;
+            letter-spacing: 3px;
+            opacity: 0.9;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+            gap: 20px;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            animation: neonBorder 3s infinite;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #ff00ff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .leaderboard {
+            background: rgba(10, 10, 26, 0.8);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 80px 180px 1fr 120px 180px;
+            gap: 15px;
+            padding: 15px 20px;
+            border-bottom: 2px solid #ff00ff;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+            color: #ff00ff;
+            letter-spacing: 2px;
+        }
+
+        .leaderboard-entry {
+            display: grid;
+            grid-template-columns: 80px 180px 1fr 120px 180px;
+            gap: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-entry:hover {
+            background: rgba(0, 255, 255, 0.15);
+            transform: translateX(10px);
+            border-color: #00ffff;
+        }
+
+        .leaderboard-entry.new-entry {
+            animation: slideIn 0.5s ease, pulse 1s ease 3;
+        }
+
+        .rank {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .rank-1 {
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+        }
+
+        .rank-2 {
+            color: #c0c0c0;
+            text-shadow: 0 0 10px #c0c0c0;
+        }
+
+        .rank-3 {
+            color: #cd7f32;
+            text-shadow: 0 0 10px #cd7f32;
+        }
+
+        .player-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .email {
+            font-size: 1.1rem;
+            color: rgba(255, 0, 255, 0.8);
+            word-break: break-all;
+        }
+
+        .score {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ff00ff;
+            text-align: center;
+        }
+
+        .timestamp {
+            font-size: 0.9rem;
+            color: rgba(0, 255, 255, 0.6);
+            text-align: right;
+        }
+
+        .trophy {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(0, 255, 255, 0.5);
+            font-size: 1.3rem;
+        }
+
+        .last-updated {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(0, 255, 255, 0.5);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        .connection-status.connected {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+        }
+
+        .connection-status.disconnected {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff0000;
+            color: #ff0000;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .leaderboard-header,
+            .leaderboard-entry {
+                grid-template-columns: 60px 1fr 100px;
+                gap: 10px;
+                font-size: 0.9rem;
+            }
+
+            .timestamp {
+                display: none;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status disconnected" id="connectionStatus">⚠️ DISCONNECTED</div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🏆 LEADERBOARD 🏆</h1>
+            <div class="subtitle">VIP Party Bouncer - Top Defenders</div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-box">
+                <div class="stat-label">Total Players</div>
+                <div class="stat-value" id="totalPlayers">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Top Score</div>
+                <div class="stat-value" id="topScore">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Live Updates</div>
+                <div class="stat-value">⚡</div>
+            </div>
+        </div>
+
+        <div class="leaderboard">
+            <div class="leaderboard-header">
+                <div>RANK</div>
+                <div>PLAYER</div>
+                <div>EMAIL</div>
+                <div>SCORE</div>
+                <div class="timestamp">TIME</div>
+            </div>
+            <div id="leaderboardList">
+                <div class="empty-state">
+                    <div>⏳ Waiting for players...</div>
+                    <div style="margin-top: 20px; font-size: 1rem;">Start playing to see scores here!</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-updated" id="lastUpdated">
+            Last updated: Never
+        </div>
+    </div>
+
+    <script>
+        class LeaderboardDisplay {
+            constructor() {
+                this.apiUrl = 'http://localhost:8000/api/leaderboard';
+                this.previousScores = [];
+                this.updateInterval = null;
+                this.isConnected = false;
+            }
+
+            async fetchLeaderboard() {
+                try {
+                    const response = await fetch(this.apiUrl);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    this.updateConnectionStatus(true);
+                    this.renderLeaderboard(data);
+                    this.updateStats(data);
+                    this.updateTimestamp();
+                    
+                    // Store for comparison
+                    this.previousScores = data.map(entry => entry.player_name + entry.score);
+                    
+                } catch (error) {
+                    console.error('Failed to fetch leaderboard:', error);
+                    this.updateConnectionStatus(false);
+                }
+            }
+
+            updateConnectionStatus(connected) {
+                this.isConnected = connected;
+                const statusElement = document.getElementById('connectionStatus');
+                
+                if (connected) {
+                    statusElement.className = 'connection-status connected';
+                    statusElement.textContent = '✅ CONNECTED';
+                } else {
+                    statusElement.className = 'connection-status disconnected';
+                    statusElement.textContent = '⚠️ DISCONNECTED';
+                }
+            }
+
+            renderLeaderboard(entries) {
+                const listElement = document.getElementById('leaderboardList');
+                
+                if (entries.length === 0) {
+                    listElement.innerHTML = `
+                        <div class="empty-state">
+                            <div>⏳ Waiting for players...</div>
+                            <div style="margin-top: 20px; font-size: 1rem;">Start playing to see scores here!</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const html = entries.map(entry => {
+                    const isNew = !this.previousScores.includes(entry.player_name + entry.score);
+                    const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+                    const trophy = entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : '';
+                    const newClass = isNew ? 'new-entry' : '';
+                    
+                    const timestamp = new Date(entry.timestamp).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    return `
+                        <div class="leaderboard-entry ${newClass}">
+                            <div class="rank ${rankClass}">${trophy} #${entry.rank}</div>
+                            <div class="player-name">${this.escapeHtml(entry.player_name)}</div>
+                            <div class="email">${this.escapeHtml(entry.email)}</div>
+                            <div class="score">${entry.score.toLocaleString()}</div>
+                            <div class="timestamp">${timestamp}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                listElement.innerHTML = html;
+            }
+
+            updateStats(entries) {
+                const totalPlayers = entries.length;
+                const topScore = entries.length > 0 ? entries[0].score : 0;
+
+                document.getElementById('totalPlayers').textContent = totalPlayers;
+                document.getElementById('topScore').textContent = topScore.toLocaleString();
+            }
+
+            updateTimestamp() {
+                const now = new Date().toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                document.getElementById('lastUpdated').textContent = `Last updated: ${now}`;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            start() {
+                // Initial fetch
+                this.fetchLeaderboard();
+
+                // Update every 2 seconds
+                this.updateInterval = setInterval(() => {
+                    this.fetchLeaderboard();
+                }, 2000);
+            }
+
+            stop() {
+                if (this.updateInterval) {
+                    clearInterval(this.updateInterval);
+                    this.updateInterval = null;
+                }
+            }
+        }
+
+        // Initialize and start the leaderboard display
+        const leaderboard = new LeaderboardDisplay();
+        
+        // Start when page loads
+        window.addEventListener('load', () => {
+            leaderboard.start();
+        });
+
+        // Stop when page is about to unload
+        window.addEventListener('beforeunload', () => {
+            leaderboard.stop();
+        });
+    </script>
+</body>
+</html>

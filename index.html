@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>VIP Party Bouncer 🎭</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .game-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 15px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .lives {
+            font-size: 1.5rem;
+        }
+
+        .timer-container {
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            border-radius: 10px;
+            transition: width linear 5s;
+            box-shadow: 0 0 10px rgba(254, 202, 87, 0.6);
+        }
+
+        .card-stack {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .guest-card {
+            position: absolute;
+            width: 90%;
+            max-width: 350px;
+            height: 450px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.3s ease;
+            touch-action: none;
+        }
+
+        .guest-card.dragging {
+            cursor: grabbing;
+        }
+
+        .guest-card.swipe-right {
+            animation: swipeRight 0.5s forwards;
+        }
+
+        .guest-card.swipe-left {
+            animation: swipeLeft 0.5s forwards;
+        }
+
+        .guest-card.swipe-up {
+            animation: swipeUp 0.5s forwards;
+        }
+
+        @keyframes swipeRight {
+            to {
+                transform: translateX(200%) rotate(30deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes swipeLeft {
+            to {
+                transform: translateX(-200%) rotate(-30deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes swipeUp {
+            to {
+                transform: translateY(-200%);
+                opacity: 0;
+            }
+        }
+
+        .guest-emoji {
+            font-size: 6rem;
+            margin-bottom: 20px;
+        }
+
+        .guest-description {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .guest-hint {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .swipe-indicators {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin-top: auto;
+            padding-bottom: 20px;
+        }
+
+        .indicator {
+            flex: 1;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .indicator-left {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+
+        .indicator-right {
+            background: linear-gradient(135deg, #51cf66, #37b24d);
+            color: white;
+        }
+
+        .game-over-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .game-over-screen.active {
+            display: flex;
+        }
+
+        .game-over-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .game-over-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .final-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 20px;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+        }
+
+        .button:active {
+            transform: scale(0.95);
+        }
+
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .start-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .start-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .start-content .subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .instructions {
+            text-align: left;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .instructions p {
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .instructions strong {
+            color: #667eea;
+        }
+
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 999;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .feedback.show {
+            animation: feedbackPop 0.6s forwards;
+        }
+
+        @keyframes feedbackPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="start-screen" id="startScreen">
+        <div class="start-content">
+            <h1>🎭 VIP Party Bouncer</h1>
+            <p class="subtitle">¡Protege la fiesta de las amenazas!</p>
+            <div class="instructions">
+                <p><strong>👉 Desliza a la Derecha:</strong> Déjalos entrar (Seguro)</p>
+                <p><strong>👈 Desliza a la Izquierda:</strong> Échalos fuera (Peligro)</p>
+                <p><strong>⏱️ Temporizador:</strong> ¡Decide antes de que se acabe el tiempo!</p>
+                <p><strong>❤️ Vidas:</strong> Tienes 3 oportunidades. ¡No te equivoques!</p>
+            </div>
+            <button class="button" onclick="game.startGame()">Comenzar Juego</button>
+        </div>
+    </div>
+
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <div class="header">
+            <h1>🎭 VIP Party Bouncer</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-label">Puntuación</div>
+                    <div class="stat-value" id="scoreDisplay">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Vidas</div>
+                    <div class="stat-value lives" id="livesDisplay">❤️❤️❤️</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timer-container">
+            <div class="timer-bar" id="timerBar"></div>
+        </div>
+
+        <div class="card-stack" id="cardStack">
+            <!-- Cards will be dynamically inserted here -->
+        </div>
+
+        <div class="swipe-indicators">
+            <div class="indicator indicator-left">⬅️ RECHAZAR</div>
+            <div class="indicator indicator-right">ACEPTAR ➡️</div>
+        </div>
+    </div>
+
+    <div class="game-over-screen" id="gameOverScreen">
+        <div class="game-over-content">
+            <h2>¡Juego Terminado! 🎮</h2>
+            <div class="final-score" id="finalScore">0</div>
+            <input type="text" class="name-input" id="playerName" placeholder="Ingresa tu nombre" maxlength="20">
+            <input type="email" class="name-input" id="playerEmail" placeholder="Ingresa tu email" maxlength="50">
+            <button class="button" onclick="game.submitScore()">Enviar Puntuación</button>
+            <button class="button" onclick="game.restartGame()">Jugar de Nuevo</button>
+        </div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <script>
+        const GUEST_DATA = [
+            { emoji: "🎫", description: "Invitado con ticket firmado digitalmente", safe: true, hint: "Autenticación válida" },
+            { emoji: "👨‍💻", description: "Técnico con acceso cifrado", safe: true, hint: "Credenciales seguras" },
+            { emoji: "👨‍💼", description: "Auditor con certificado SSL", safe: true, hint: "Conexión verificada" },
+            { emoji: "👮", description: "Staff con 2FA habilitado", safe: true, hint: "Doble autenticación" },
+            { emoji: "📧", description: "Email de phishing detectado", safe: true, hint: "El equipo de seguridad ya fue notificado" },
+            { emoji: "🔒", description: "Transacción sospechosa identificada", safe: true, hint: "Se requiere verificación adicional del cliente" },
+            { emoji: "💳", description: "Tarjeta clonada en el sistema", safe: true, hint: "La tarjeta será bloqueada automáticamente" },
+            { emoji: "🚨", description: "Intento de acceso desde IP bloqueada", safe: true, hint: "El SOC está monitoreando la actividad" },
+            { emoji: "📱", description: "App bancaria con certificado vencido", safe: true, hint: "Renovación de certificado programada" },
+            { emoji: "🔐", description: "Contraseñas débiles detectadas en auditoría", safe: true, hint: "Política de cambio obligatorio activada" },
+            { emoji: "💾", description: "Backup con datos sensibles sin cifrar", safe: true, hint: "Proceso de cifrado AES-256 en curso" },
+            { emoji: "🌐", description: "Sesión activa desde ubicación inusual", safe: true, hint: "Re-autenticación solicitada al usuario" },
+            { emoji: "📊", description: "Logs mostrando intentos de fuerza bruta", safe: true, hint: "Rate limiting y CAPTCHA configurados" },
+            { emoji: "🔍", description: "Fuga de datos detectada en monitoreo", safe: true, hint: "Sistema aislado y autoridades notificadas" },
+            
+            // Dangerous threats - OWASP themed
+            { emoji: "🕵️", description: "Persona con ganzúa intentando entrar", safe: false, hint: "DevSecOps: Acceso No Autorizado" },
+            { emoji: "💣", description: "Sujeto con bomba parpadeante", safe: false, hint: "DevSecOps: Vulnerabilidad Crítica" },
+            { emoji: "🔪", description: "Figura sospechosa con capucha", safe: false, hint: "DevSecOps: Actor Malicioso" },
+            { emoji: "💉", description: "Extraño con kit de inyección SQL", safe: false, hint: "DevSecOps: SQL Injection" },
+            { emoji: "🦠", description: "Persona distribuyendo USB con malware", safe: false, hint: "DevSecOps: Distribución de Malware" },
+            { emoji: "🚪", description: "Alguien escalando al área VIP sin permiso", safe: false, hint: "DevSecOps: Broken Access Control" },
+            { emoji: "📝", description: "Tipo con datos sensibles sin cifrar", safe: false, hint: "DevSecOps: Cryptographic Failures" },
+            { emoji: "🎭", description: "Impostor con invitación falsificada", safe: false, hint: "DevSecOps: Authentication Failures" },
+            { emoji: "⚙️", description: "Técnico explotando puerta trasera mal configurada", safe: false, hint: "DevSecOps: Security Misconfiguration" },
+            { emoji: "📜", description: "Hacker con script XSS en el portapapeles", safe: false, hint: "DevSecOps: Cross-Site Scripting" },
+            { emoji: "🔓", description: "Intruso con credenciales predeterminadas", safe: false, hint: "DevSecOps: Weak Authentication" },
+            { emoji: "🌐", description: "Atacante intentando SSRF contra el sistema", safe: false, hint: "DevSecOps: Server-Side Request Forgery" },
+            { emoji: "📊", description: "Espía sin registro de auditoría", safe: false, hint: "DevSecOps: Logging Failures" },
+            { emoji: "🔗", description: "Persona con dependencias vulnerables", safe: false, hint: "DevSecOps: Vulnerable Components" }
+        ];
+
+        class CardManager {
+            constructor() {
+                this.cards = [];
+                this.currentCardIndex = 0;
+            }
+
+            reset() {
+                this.cards = [];
+                this.currentCardIndex = 0;
+            }
+
+            createCard(guestData) {
+                const card = document.createElement('div');
+                card.className = 'guest-card';
+                card.innerHTML = `
+                    <div class="guest-emoji">${guestData.emoji}</div>
+                    <div class="guest-description">${guestData.description}</div>
+                    <div class="guest-hint">${guestData.hint}</div>
+                `;
+                card.dataset.safe = guestData.safe;
+                return card;
+            }
+
+            shuffleGuests() {
+                return [...GUEST_DATA].sort(() => Math.random() - 0.5);
+            }
+
+            initializeCards(container) {
+                const shuffled = this.shuffleGuests();
+                this.cards = shuffled.map(guest => this.createCard(guest));
+                this.currentCardIndex = 0;
+                
+                container.innerHTML = '';
+                const numInitialCards = Math.min(3, this.cards.length);
+                for (let i = 0; i < numInitialCards; i++) {
+                    container.appendChild(this.cards[i]);
+                    const stackPosition = numInitialCards - 1 - i;
+                    this.cards[i].style.transform = `scale(${1 - stackPosition * 0.05}) translateY(${stackPosition * 5}px)`;
+                    this.cards[i].style.zIndex = 100 + (numInitialCards - 1 - i);
+                    this.cards[i].dataset.cardIndex = i;
+                }
+            }
+
+            getCurrentCard() {
+                return this.cards[this.currentCardIndex];
+            }
+
+            nextCard(container) {
+                this.currentCardIndex++;
+                
+                if (this.currentCardIndex >= this.cards.length) {
+                    return null; 
+                }
+
+                const nextIndex = this.currentCardIndex + 2;
+                if (nextIndex < this.cards.length) {
+                    const newCard = this.cards[nextIndex];
+                    container.appendChild(newCard); 
+                    newCard.style.transform = `scale(0.9) translateY(10px)`;
+                    newCard.dataset.cardIndex = nextIndex;
+                }
+                
+                this.updateCardZIndices(container);
+
+                return this.cards[this.currentCardIndex];
+            }
+
+            updateCardZIndices(container) {
+                const cardsInDom = Array.from(container.children);
+                cardsInDom.forEach((card) => {
+                    const cardIdx = parseInt(card.dataset.cardIndex);
+                    const offset = cardIdx - this.currentCardIndex;
+                    card.style.zIndex = 100 - offset; 
+                });
+            }
+
+            hasMoreCards() {
+                return this.currentCardIndex < this.cards.length - 1;
+            }
+        }
+
+        class GameState {
+            constructor() {
+                this.lives = 3;
+                this.score = 0;
+                this.isActive = false;
+                this.timerInterval = null;
+            }
+
+            reset() {
+                this.lives = 3;
+                this.score = 0;
+                this.isActive = false;
+                this.clearTimer();
+            }
+
+            addScore(points) {
+                this.score += points;
+            }
+
+            loseLife() {
+                this.lives--;
+                return this.lives <= 0;
+            }
+
+            startTimer(callback) {
+                this.clearTimer();
+                const timerBar = document.getElementById('timerBar');
+                timerBar.style.width = '100%';
+                timerBar.style.transition = 'none';
+                
+                setTimeout(() => {
+                    timerBar.style.transition = 'width linear 5s';
+                    timerBar.style.width = '0%';
+                }, 50);
+
+                this.timerInterval = setTimeout(callback, 5000);
+            }
+
+            clearTimer() {
+                if (this.timerInterval) {
+                    clearTimeout(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            }
+        }
+
+        class VIPBouncerGame {
+            constructor() {
+                this.cardManager = new CardManager();
+                this.gameState = new GameState();
+                this.touchStartX = 0;
+                this.touchStartY = 0;
+                this.currentCard = null;
+                this.isProcessing = false; 
+                this.isDragging = false; 
+                
+                this.cardStack = document.getElementById('cardStack');
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                // Touch events for mobile
+                this.cardStack.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+                this.cardStack.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+                this.cardStack.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+                
+                // Mouse events for desktop/testing
+                this.cardStack.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                // Listen for mouseup on document to catch drags outside the card
+                document.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+            }
+
+            startGame() {
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('gameContainer').style.display = 'flex';
+                
+                this.gameState.reset();
+                this.gameState.isActive = true;
+                
+                this.cardManager.initializeCards(this.cardStack);
+                this.currentCard = this.cardManager.getCurrentCard();
+                
+                this.updateUI();
+                this.startCardTimer();
+            }
+
+            handleMouseDown(e) {
+                if (this.isProcessing) return;
+                if (!this.gameState.isActive) return;
+
+                let touchedCard = e.target;
+                while (touchedCard && !touchedCard.classList.contains('guest-card')) {
+                    touchedCard = touchedCard.parentElement;
+                }
+                
+                if (!touchedCard || touchedCard !== this.currentCard) return;
+                e.preventDefault(); 
+                this.touchStartX = e.clientX;
+                this.touchStartY = e.clientY;
+                this.currentCard.classList.add('dragging');
+                this.isDragging = true;
+            }
+
+            handleMouseMove(e) {
+                if (!this.isDragging || !this.currentCard) return;
+                
+                const deltaX = e.clientX - this.touchStartX;
+                const rotation = deltaX / 10;
+                this.currentCard.style.transform = `rotate(${rotation}deg)`;
+            }
+
+            handleMouseUp(e) {
+                if (!this.isDragging || !this.currentCard) {
+                    this.isDragging = false;
+                    return;
+                }
+                
+                if (!this.currentCard.classList.contains('dragging')) {
+                    this.isDragging = false;
+                    return;
+                }
+
+                const touchEndX = e.clientX;
+                const touchEndY = e.clientY;
+                
+                const deltaX = touchEndX - this.touchStartX;
+                const deltaY = touchEndY - this.touchStartY;
+                
+                // Reset visual state
+                this.currentCard.style.transform = '';
+                this.currentCard.classList.remove('dragging');
+                this.isDragging = false;
+
+                // Determine swipe direction
+                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                    if (deltaX > 0) {
+                        this.handleSwipe('right');
+                    } else {
+                        this.handleSwipe('left');
+                    }
+                } else if (deltaY < -50) {
+                    this.handleSwipe('up');
+                }
+            }
+
+            handleTouchStart(e) {
+                if (this.isProcessing) return;
+                if (!this.gameState.isActive) return;
+
+                // Find which card was touched by checking parent elements
+                let touchedCard = e.target;
+                while (touchedCard && !touchedCard.classList.contains('guest-card')) {
+                    touchedCard = touchedCard.parentElement;
+                }
+                
+                if (!touchedCard || touchedCard !== this.currentCard) return;
+                e.preventDefault(); // Prevent scrolling
+                this.touchStartX = e.touches[0].clientX;
+                this.touchStartY = e.touches[0].clientY;
+                this.currentCard.classList.add('dragging');
+            }
+
+            handleTouchEnd(e) {
+                if (!this.currentCard) return;
+                if (!this.currentCard.classList.contains('dragging')) return;
+
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                
+                const deltaX = touchEndX - this.touchStartX;
+                const deltaY = touchEndY - this.touchStartY;
+                
+                this.currentCard.classList.remove('dragging');
+
+                // Determine swipe direction
+                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                    if (deltaX > 0) {
+                        this.handleSwipe('right');
+                    } else {
+                        this.handleSwipe('left');
+                    }
+                } else if (deltaY < -50) {
+                    this.handleSwipe('up');
+                }
+            }
+
+            handleSwipe(direction) {
+                if (!this.gameState.isActive || this.isProcessing) return;
+
+                this.isProcessing = true; // Block new input
+                this.gameState.clearTimer();
+                const isSafe = this.currentCard.dataset.safe === 'true';
+
+                let correct = false;
+                if (direction === 'right' && isSafe) {
+                    correct = true;
+                } else if (direction === 'left' && !isSafe) {
+                    correct = true;
+                } else if (direction === 'up') {
+                    correct = false; // Auto-fail
+                }
+
+                // Animate card
+                this.currentCard.classList.add(`swipe-${direction}`);
+
+                // Show feedback
+                this.showFeedback(correct);
+
+                // Update game state
+                if (correct) {
+                    this.gameState.addScore(100);
+                } else {
+                    const gameOver = this.gameState.loseLife();
+                    if (gameOver) {
+                        setTimeout(() => this.endGame(), 500);
+                        return;
+                    }
+                }
+
+                this.updateUI();
+
+                // Next card
+                setTimeout(() => {
+                    const cardStack = document.getElementById('cardStack');
+                    this.currentCard.remove();
+                    
+                    const nextCard = this.cardManager.nextCard(cardStack);
+                    
+                    if (nextCard) {
+                        this.currentCard = nextCard;
+                        this.isProcessing = false; // Allow new input
+                        this.startCardTimer();
+                    } else {
+                        // All cards done - end game
+                        this.isProcessing = false;
+                        setTimeout(() => this.endGame(), 500);
+                    }
+                }, 500);
+            }
+
+            startCardTimer() {
+                this.gameState.startTimer(() => {
+                    // Time's up - auto fail
+                    this.handleSwipe('up');
+                });
+            }
+
+            showFeedback(correct) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = correct ? '✅ ¡CORRECTO!' : '❌ ¡INCORRECTO!';
+                feedback.style.color = correct ? '#51cf66' : '#ff6b6b';
+                feedback.classList.add('show');
+                
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 600);
+            }
+
+            updateUI() {
+                document.getElementById('scoreDisplay').textContent = this.gameState.score;
+                const hearts = '❤️'.repeat(this.gameState.lives) + '🖤'.repeat(3 - this.gameState.lives);
+                document.getElementById('livesDisplay').textContent = hearts;
+            }
+
+            endGame() {
+                this.gameState.isActive = false;
+                this.gameState.clearTimer();
+                
+                document.getElementById('finalScore').textContent = this.gameState.score;
+                document.getElementById('gameOverScreen').classList.add('active');
+            }
+
+            async submitScore() {
+                const playerName = document.getElementById('playerName').value.trim();
+                const playerEmail = document.getElementById('playerEmail').value.trim();
+                
+                if (!playerName) {
+                    alert('¡Por favor ingresa tu nombre!');
+                    return;
+                }
+                
+                if (!playerEmail) {
+                    alert('¡Por favor ingresa tu email!');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:8000/api/score', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            player_name: playerName,
+                            email: playerEmail,
+                            score: this.gameState.score,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+
+                    if (response.ok) {
+                        alert('¡Puntuación enviada exitosamente! 🎉');
+                        this.restartGame();
+                    } else {
+                        alert('Error al enviar la puntuación. Por favor intenta de nuevo.');
+                    }
+                } catch (error) {
+                    console.error('Error submitting score:', error);
+                    alert('Error al conectar con el servidor. ¡Asegúrate de que el backend esté ejecutándose!');
+                }
+            }
+
+            restartGame() {
+                document.getElementById('gameOverScreen').classList.remove('active');
+                document.getElementById('playerName').value = '';
+                document.getElementById('playerEmail').value = '';
+                this.cardManager.reset();
+                this.isProcessing = false;
+                this.isDragging = false;
+                this.currentCard = null;
+                this.startGame();
+            }
+        }
+
+        // Initialize game
+        const game = new VIPBouncerGame();
+    </script>
+</body>
+</html>
