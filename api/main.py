@@ -6,8 +6,14 @@ from pydantic import BaseModel
 from typing import List
 from datetime import datetime
 import uvicorn
+import os
 
 app = FastAPI(title="VIP Party Bouncer API")
+
+# Helper used to protect against path differences in Vercel vs Local
+# We now store HTML in api/templates to ensure they are bundled with the function
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIR = os.path.join(CURRENT_DIR, "templates")
 
 # CORS Configuration - Allow all origins for TV and Phone
 app.add_middleware(
@@ -37,12 +43,12 @@ class LeaderboardEntry(BaseModel):
 @app.get("/")
 async def read_root():
     """Serve the mobile game interface"""
-    return FileResponse("index.html")
+    return FileResponse(os.path.join(TEMPLATES_DIR, "index.html"))
 
 @app.get("/leaderboard-view")
 async def read_leaderboard_view():
     """Serve the TV leaderboard display"""
-    return FileResponse("leaderboard.html")
+    return FileResponse(os.path.join(TEMPLATES_DIR, "leaderboard.html"))
 
 @app.post("/api/score")
 async def submit_score(submission: ScoreSubmission):
@@ -91,6 +97,10 @@ async def get_leaderboard(limit: int = 10):
     ]
     
     return ranked_entries
+@app.get("/api/hello")
+async def say_hello():
+    """Simple hello endpoint to test API"""
+    return {"message": "Hello from VIP Party Bouncer API!"}
 
 @app.delete("/api/leaderboard/reset")
 async def reset_leaderboard():
@@ -107,5 +117,5 @@ async def health_check():
         "total_scores": len(leaderboard_storage)
     }
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
