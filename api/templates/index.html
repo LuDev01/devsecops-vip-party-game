@@ -406,36 +406,35 @@
 
     <script>
         const GUEST_DATA = [
-            { emoji: "🎫", description: "Invitado con ticket firmado digitalmente", safe: true, hint: "Autenticación válida" },
-            { emoji: "👨‍💻", description: "Técnico con acceso cifrado", safe: true, hint: "Credenciales seguras" },
-            { emoji: "👨‍💼", description: "Auditor con certificado SSL", safe: true, hint: "Conexión verificada" },
-            { emoji: "👮", description: "Staff con 2FA habilitado", safe: true, hint: "Doble autenticación" },
-            { emoji: "📧", description: "Email de phishing detectado", safe: true, hint: "El equipo de seguridad ya fue notificado" },
-            { emoji: "🔒", description: "Transacción sospechosa identificada", safe: true, hint: "Se requiere verificación adicional del cliente" },
-            { emoji: "💳", description: "Tarjeta clonada en el sistema", safe: true, hint: "La tarjeta será bloqueada automáticamente" },
-            { emoji: "🚨", description: "Intento de acceso desde IP bloqueada", safe: true, hint: "El SOC está monitoreando la actividad" },
-            { emoji: "📱", description: "App bancaria con certificado vencido", safe: true, hint: "Renovación de certificado programada" },
-            { emoji: "🔐", description: "Contraseñas débiles detectadas en auditoría", safe: true, hint: "Política de cambio obligatorio activada" },
-            { emoji: "💾", description: "Backup con datos sensibles sin cifrar", safe: true, hint: "Proceso de cifrado AES-256 en curso" },
-            { emoji: "🌐", description: "Sesión activa desde ubicación inusual", safe: true, hint: "Re-autenticación solicitada al usuario" },
-            { emoji: "📊", description: "Logs mostrando intentos de fuerza bruta", safe: true, hint: "Rate limiting y CAPTCHA configurados" },
-            { emoji: "🔍", description: "Fuga de datos detectada en monitoreo", safe: true, hint: "Sistema aislado y autoridades notificadas" },
+            // SAFE ENTRIES (Swiping Right allows them in)
+            { emoji: "📧", description: "Correo de RRHH sobre beneficios del año", safe: true, hint: "Dominio interno verificado" },
+            { emoji: "🔒", description: "Web pidiendo cambio de clave (https)", safe: true, hint: "Certificado de seguridad válido" },
+            { emoji: "👨‍💻", description: "Soporte TI conectándose con ticket aprobado", safe: true, hint: "Solicitud iniciada por ti" },
+            { emoji: "📱", description: "Notificación de acceso 2FA en tu móvil", safe: true, hint: "Tú estás intentando entrar" },
+            { emoji: "💾", description: "Copia de seguridad en servidor cifrado", safe: true, hint: "Protocolo de respaldo seguro" },
+            { emoji: "📄", description: "Adjunto PDF de proveedor conocido", safe: true, hint: "Analizado por antivirus" },
+            { emoji: "🌐", description: "Navegando en intranet corporativa (VPN)", safe: true, hint: "Conexión segura establecida" },
+            { emoji: "🔄", description: "Actualización automática de Windows", safe: true, hint: "Parche de seguridad oficial" },
+            { emoji: "👥", description: "Reunión de Teams con enlace de la empresa", safe: true, hint: "Plataforma oficial" },
+            { emoji: "🔑", description: "Usando gestor de contraseñas corporativo", safe: true, hint: "Almacenamiento seguro" },
+            { emoji: "🛡️", description: "Antivirus bloqueando pop-up sospechoso", safe: true, hint: "Herramienta funcionando bien" },
+            { emoji: "📤", description: "Enviando datos sensibles por canal cifrado", safe: true, hint: "Cumple política de DLP" },
             
-            // Dangerous threats - OWASP themed
-            { emoji: "🕵️", description: "Persona con ganzúa intentando entrar", safe: false, hint: "DevSecOps: Acceso No Autorizado" },
-            { emoji: "💣", description: "Sujeto con bomba parpadeante", safe: false, hint: "DevSecOps: Vulnerabilidad Crítica" },
-            { emoji: "🔪", description: "Figura sospechosa con capucha", safe: false, hint: "DevSecOps: Actor Malicioso" },
-            { emoji: "💉", description: "Extraño con kit de inyección SQL", safe: false, hint: "DevSecOps: SQL Injection" },
-            { emoji: "🦠", description: "Persona distribuyendo USB con malware", safe: false, hint: "DevSecOps: Distribución de Malware" },
-            { emoji: "🚪", description: "Alguien escalando al área VIP sin permiso", safe: false, hint: "DevSecOps: Broken Access Control" },
-            { emoji: "📝", description: "Tipo con datos sensibles sin cifrar", safe: false, hint: "DevSecOps: Cryptographic Failures" },
-            { emoji: "🎭", description: "Impostor con invitación falsificada", safe: false, hint: "DevSecOps: Authentication Failures" },
-            { emoji: "⚙️", description: "Técnico explotando puerta trasera mal configurada", safe: false, hint: "DevSecOps: Security Misconfiguration" },
-            { emoji: "📜", description: "Hacker con script XSS en el portapapeles", safe: false, hint: "DevSecOps: Cross-Site Scripting" },
-            { emoji: "🔓", description: "Intruso con credenciales predeterminadas", safe: false, hint: "DevSecOps: Weak Authentication" },
-            { emoji: "🌐", description: "Atacante intentando SSRF contra el sistema", safe: false, hint: "DevSecOps: Server-Side Request Forgery" },
-            { emoji: "📊", description: "Espía sin registro de auditoría", safe: false, hint: "DevSecOps: Logging Failures" },
-            { emoji: "🔗", description: "Persona con dependencias vulnerables", safe: false, hint: "DevSecOps: Vulnerable Components" }
+            // THREATS / VULNERABILITIES (Swiping Left rejects/reports them)
+            { emoji: "🎁", description: "¡Ganaste un iPhone! Haz clic aquí", safe: false, hint: "Phishing clásico" },
+            { emoji: "📎", description: "Factura_Urgente.exe en un correo", safe: false, hint: "Extensión de archivo peligrosa" },
+            { emoji: "📞", description: "Llamada del 'CEO' pidiendo claves ya", safe: false, hint: "Ingeniería social (Vishing)" },
+            { emoji: "🔌", description: "USB encontrado en el estacionamiento", safe: false, hint: "Posible malware (Baiting)" },
+            { emoji: "📶", description: "WiFi 'Gratis_Aeropuerto' sin contraseña", safe: false, hint: "Red no segura (Sniffing)" },
+            { emoji: "📝", description: "Pegar contraseña en un Post-it en el monitor", safe: false, hint: "Mala higiene de seguridad" },
+            { emoji: "🏦", description: "Web del banco con errores de ortografía", safe: false, hint: "Sitio web clonado" },
+            { emoji: "🔄", description: "Ignorar actualización de seguridad por 6 meses", safe: false, hint: "Sistema vulnerable sin parches" },
+            { emoji: "👤", description: "Compartir tu usuario con el pasante", safe: false, hint: "Cuentas personales e intransferibles" },
+            { emoji: "🌐", description: "Web que pide datos sin candadito (http)", safe: false, hint: "Comunicación no cifrada (Man-in-the-Middle)" },
+            { emoji: "📱", description: "Instalar App 'gratis' fuera de la tienda oficial", safe: false, hint: "Software no autorizado (Sideloading)" },
+            { emoji: "🙊", description: "Hablar de secretos de la empresa en el elevador", safe: false, hint: "Fuga de información" },
+            { emoji: "📩", description: "Correo de 'Soporte' pidiendo tu contraseña", safe: false, hint: "Soporte real nunca pide tu clave" },
+            { emoji: "💻", description: "Dejar la laptop desbloqueada en la cafetería", safe: false, hint: "Acceso físico no autorizado" }
         ];
 
         class CardManager {
