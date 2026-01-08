@@ -86,7 +86,7 @@
             height: 100%;
             background: linear-gradient(90deg, #ff6b6b, #feca57);
             border-radius: 10px;
-            transition: width linear 5s;
+            transition: width linear 7s;
             box-shadow: 0 0 10px rgba(254, 202, 87, 0.6);
         }
 
@@ -348,17 +348,28 @@
     </style>
 </head>
 <body>
-    <div class="start-screen" id="startScreen">
+    <div class="start-screen" id="roleScreen">
         <div class="start-content">
             <h1>🎭 VIP Party Bouncer</h1>
+            <p class="subtitle">Selecciona tu perfil</p>
+            <button class="button" onclick="game.selectRole('general')" style="margin-bottom: 10px;">No se nada soy turista 😇</button>
+            <div style="font-size: 0.8rem; margin-bottom: 20px; color: #666;">(Correos, Webs, Wifi...)</div>
+            <button class="button" onclick="game.selectRole('dev')" style="background: linear-gradient(135deg, #11998e, #38ef7d);">Soy un super Dev 👨‍💻</button>
+            <div style="font-size: 0.8rem; color: #666;">(OWASP, AWS, Código...)</div>
+        </div>
+    </div>
+
+    <div class="start-screen" id="startScreen" style="display: none;">
+        <div class="start-content">
+            <h1 id="startTitle">🎭 Instrucciones</h1>
             <p class="subtitle">¡Protege la fiesta de las amenazas!</p>
             <div class="instructions">
-                <p><strong>👉 Desliza a la Derecha:</strong> Déjalos entrar (Seguro)</p>
-                <p><strong>👈 Desliza a la Izquierda:</strong> Échalos fuera (Peligro)</p>
-                <p><strong>⏱️ Temporizador:</strong> ¡Decide antes de que se acabe el tiempo!</p>
-                <p><strong>❤️ Vidas:</strong> Tienes 3 oportunidades. ¡No te equivoques!</p>
+                <p><strong>👉 Desliza a la Derecha:</strong> ACEPTAR (Seguro / Buenas Prácticas)</p>
+                <p><strong>👈 Desliza a la Izquierda:</strong> RECHAZAR (Vulnerabilidad / Peligro)</p>
+                <p><strong>⏱️ Temporizador:</strong> ¡Decide rápido!</p>
+                <p><strong>❤️ Vidas:</strong> Solo tienes 3 oportunidades.</p>
             </div>
-            <button class="button" onclick="game.startGame()">Comenzar Juego</button>
+            <button class="button" onclick="game.startGame()">¡A Jugar!</button>
         </div>
     </div>
 
@@ -384,11 +395,6 @@
         <div class="card-stack" id="cardStack">
             <!-- Cards will be dynamically inserted here -->
         </div>
-
-        <div class="swipe-indicators">
-            <div class="indicator indicator-left">⬅️ RECHAZAR</div>
-            <div class="indicator indicator-right">ACEPTAR ➡️</div>
-        </div>
     </div>
 
     <div class="game-over-screen" id="gameOverScreen">
@@ -405,7 +411,7 @@
     <div class="feedback" id="feedback"></div>
 
     <script>
-        const GUEST_DATA = [
+        const GUEST_DATA_GENERAL = [
             // SAFE ENTRIES (Swiping Right allows them in)
             { emoji: "📧", description: "Correo de RRHH sobre beneficios del año", safe: true, hint: "Dominio interno verificado" },
             { emoji: "🔒", description: "Web pidiendo cambio de clave (https)", safe: true, hint: "Certificado de seguridad válido" },
@@ -432,9 +438,39 @@
             { emoji: "👤", description: "Compartir tu usuario con el pasante", safe: false, hint: "Cuentas personales e intransferibles" },
             { emoji: "🌐", description: "Web que pide datos sin candadito (http)", safe: false, hint: "Comunicación no cifrada (Man-in-the-Middle)" },
             { emoji: "📱", description: "Instalar App 'gratis' fuera de la tienda oficial", safe: false, hint: "Software no autorizado (Sideloading)" },
-            { emoji: "🙊", description: "Hablar de secretos de la empresa en el elevador", safe: false, hint: "Fuga de información" },
+            { emoji: "🙊", description: "Hablar de secretos de la empresa en el ascensor", safe: false, hint: "Fuga de información" },
             { emoji: "📩", description: "Correo de 'Soporte' pidiendo tu contraseña", safe: false, hint: "Soporte real nunca pide tu clave" },
             { emoji: "💻", description: "Dejar la laptop desbloqueada en la cafetería", safe: false, hint: "Acceso físico no autorizado" }
+        ];
+
+        const GUEST_DATA_DEV = [
+             // SAFE (Swipe Right)
+            { emoji: "🔐", description: "Commit firmado con clave GPG", safe: true, hint: "Integridad de código verificada" },
+            { emoji: "🤖", description: "Dependabot: PR de parche de seguridad", safe: true, hint: "Gestión proactiva de dependencias" },
+            { emoji: "☁️", description: "S3 Bucket: Public Access Blocked", safe: true, hint: "Configuración correcta de privacidad" },
+            { emoji: "💉", description: "Query SQL usando Prepared Statements", safe: true, hint: "Prevención de SQL Injection" },
+            { emoji: "🤐", description: "API Key leída desde Vault/Secrets Manager", safe: true, hint: "Gestión segura de secretos" },
+            { emoji: "🐳", description: "Imagen Docker 'distroless' (sin shell)", safe: true, hint: "Reducción de superficie de ataque" },
+            { emoji: "👀", description: "Merge Request aprobado por 2 reviewers", safe: true, hint: "Revisión de código obligatoria" },
+            { emoji: "🔒", description: "Terraform State cifrado en backend remoto", safe: true, hint: "Protección de infraestructura (IaC)" },
+            { emoji: "🛡️", description: "WAF bloqueando tráfico malicioso (XSS)", safe: true, hint: "Seguridad perimetral activa" },
+            { emoji: "🎫", description: "JWT firmado y con expiración de 15 min", safe: true, hint: "Gestión de sesiones robusta" },
+            { emoji: "📝", description: "Logs sanitizados (Sin PII/Datos personales)", safe: true, hint: "Privacidad por diseño" },
+            { emoji: "🔑", description: "MFA habilitado para la cuenta AWS Root", safe: true, hint: "Protección de identidad crítica" },
+
+            // UNSAFE / VULNERABILITIES (Swipe Left)
+            { emoji: "🔑", description: "AWS Access Key hardcodeada en código", safe: false, hint: "Secretos expuestos (Credential Leak)" },
+            { emoji: "🪣", description: "S3 Bucket público con datos de usuarios", safe: false, hint: "Exposición de datos (Misconfiguration)" },
+            { emoji: "🔓", description: "chmod 777 -R en carpeta del servidor", safe: false, hint: "Permisos excesivos (Broken Access Control)" },
+            { emoji: "🙈", description: "Desactivar validación SSL en producción", safe: false, hint: "Fallo en integridad (Man-In-The-Middle)" },
+            { emoji: "📜", description: "Commit incluyendo archivo .env", safe: false, hint: "Exposición de secretos en git" },
+            { emoji: "👑", description: "Conexión a BD con usuario 'sa' o 'root'", safe: false, hint: "Violación de principio de menor privilegio" },
+            { emoji: "📦", description: "Librería open-source abandonada hace 5 años", safe: false, hint: "Componente vulnerable y desactualizado" },
+            { emoji: "💥", description: "dangerouslySetInnerHTML(input_usuario)", safe: false, hint: "Cross-Site Scripting (XSS Dom-based)" },
+            { emoji: "🌐", description: "Puerto SSH (22) abierto a 0.0.0.0/0", safe: false, hint: "Exposición de gestión remota" },
+            { emoji: "🐛", description: "Error 500 mostrando Stack Trace al usuario", safe: false, hint: "Fuga de información técnica" },
+            { emoji: "📛", description: "Guardar passwords en texto plano o MD5", safe: false, hint: "Fallo criptográfico crítico" },
+            { emoji: "🚪", description: "API: DELETE /user/5 sin verificar auth", safe: false, hint: "Broken Access Control (BOLA/IDOR)" }
         ];
 
         class CardManager {
@@ -460,12 +496,13 @@
                 return card;
             }
 
-            shuffleGuests() {
-                return [...GUEST_DATA].sort(() => Math.random() - 0.5);
+            shuffleGuests(mode) {
+                const data = mode === 'dev' ? GUEST_DATA_DEV : GUEST_DATA_GENERAL;
+                return [...data].sort(() => Math.random() - 0.5);
             }
 
-            initializeCards(container) {
-                const shuffled = this.shuffleGuests();
+            initializeCards(container, mode) {
+                const shuffled = this.shuffleGuests(mode);
                 this.cards = shuffled.map(guest => this.createCard(guest));
                 this.currentCardIndex = 0;
                 
@@ -479,6 +516,7 @@
                     this.cards[i].dataset.cardIndex = i;
                 }
             }
+
 
             getCurrentCard() {
                 return this.cards[this.currentCardIndex];
@@ -549,11 +587,11 @@
                 timerBar.style.transition = 'none';
                 
                 setTimeout(() => {
-                    timerBar.style.transition = 'width linear 5s';
+                    timerBar.style.transition = 'width linear 7s';
                     timerBar.style.width = '0%';
                 }, 50);
 
-                this.timerInterval = setTimeout(callback, 5000);
+                this.timerInterval = setTimeout(callback, 7000);
             }
 
             clearTimer() {
@@ -573,10 +611,13 @@
                 this.currentCard = null;
                 this.isProcessing = false; 
                 this.isDragging = false; 
+                this.currentRole = 'general'; // Default role
                 
                 this.cardStack = document.getElementById('cardStack');
                 this.bindEvents();
             }
+
+            // ... (bindEvents is unchanged)
 
             bindEvents() {
                 // Touch events for mobile
@@ -586,9 +627,22 @@
                 
                 // Mouse events for desktop/testing
                 this.cardStack.addEventListener('mousedown', (e) => this.handleMouseDown(e));
-                // Listen for mouseup on document to catch drags outside the card
                 document.addEventListener('mouseup', (e) => this.handleMouseUp(e));
                 document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+            }
+
+            selectRole(role) {
+                this.currentRole = role;
+                document.getElementById('roleScreen').style.display = 'none';
+                document.getElementById('startScreen').style.display = 'flex';
+                
+                // Update title based on role
+                const title = document.getElementById('startTitle');
+                if (role === 'dev') {
+                    title.textContent = '👨‍💻 Modo DevSecOps';
+                } else {
+                    title.textContent = '👤� Modo Turista';
+                }
             }
 
             startGame() {
@@ -598,7 +652,7 @@
                 this.gameState.reset();
                 this.gameState.isActive = true;
                 
-                this.cardManager.initializeCards(this.cardStack);
+                this.cardManager.initializeCards(this.cardStack, this.currentRole);
                 this.currentCard = this.cardManager.getCurrentCard();
                 
                 this.updateUI();
@@ -833,13 +887,14 @@
 
             restartGame() {
                 document.getElementById('gameOverScreen').classList.remove('active');
+                document.getElementById('roleScreen').style.display = 'flex'; // Go back to role selection
                 document.getElementById('playerName').value = '';
                 document.getElementById('playerEmail').value = '';
                 this.cardManager.reset();
                 this.isProcessing = false;
                 this.isDragging = false;
                 this.currentCard = null;
-                this.startGame();
+                // Game starts after selecting role again
             }
         }
 
